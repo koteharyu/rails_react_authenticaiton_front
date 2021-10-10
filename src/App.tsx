@@ -1,29 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
+import React, { useState, useEffect, createContext } from "react"
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom"
 
-import { getCurrentUser } from 'lib/api/auth'
-import { User } from 'interfaces/index'
+import CommonLayout from "components/layouts/CommonLayout"
+import Home from "components/pages/Home"
+import SignUp from "components/pages/SignUp"
+import SignIn from "components/pages/SignIn"
 
-function App() {
+import { getCurrentUser } from "lib/api/auth"
+import { User } from "interfaces/index"
 
+// グローバルで扱う変数・関数
+export const AuthContext = createContext({} as {
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  isSignedIn: boolean
+  setIsSignedIn: React.Dispatch<React.SetStateAction<boolean>>
+  currentUser: User | undefined
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | undefined>>
+})
+
+const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [isSignedIn, setIsSignedIn] = useState<boolean>(false)
   const [currentUser, setCurrentUser] = useState<User | undefined>()
 
+  // 認証済みのユーザーがいるかどうかチェック
+  // 確認できた場合はそのユーザーの情報を取得
   const handleGetCurrentUser = async () => {
     try {
       const res = await getCurrentUser()
 
-      if (res.data.isLoding === true) {
+      if (res?.data.isLogin === true) {
         setIsSignedIn(true)
-        setCurrentUser(res.data.data)
+        setCurrentUser(res?.data.data)
 
-        console.log(res.data.data)
+        console.log(res?.data.data)
       } else {
-        console.log("No Current User")
+        console.log("No current user")
       }
     } catch (err) {
-      console.error(err)
+      console.log(err)
     }
 
     setLoading(false)
@@ -33,6 +49,9 @@ function App() {
     handleGetCurrentUser()
   }, [setCurrentUser])
 
+
+  // ユーザーが認証済みかどうかでルーティングを決定
+  // 未認証だった場合は「/signin」ページに促す
   const Private = ({ children }: { children: React.ReactElement }) => {
     if (!loading) {
       if (isSignedIn) {
@@ -47,11 +66,11 @@ function App() {
 
   return (
     <Router>
-      <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser}}>
+      <AuthContext.Provider value={{ loading, setLoading, isSignedIn, setIsSignedIn, currentUser, setCurrentUser }}>
         <CommonLayout>
           <Switch>
-            <Route exact path="/signup" component={SingUp} />
-            <Route exact path="/signin" component={SingIn} />
+            <Route exact path="/signup" component={SignUp} />
+            <Route exact path="/signin" component={SignIn} />
             <Private>
               <Route exact path="/" component={Home} />
             </Private>
@@ -59,7 +78,7 @@ function App() {
         </CommonLayout>
       </AuthContext.Provider>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
