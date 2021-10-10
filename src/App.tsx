@@ -30,11 +30,11 @@ const App: React.FC = () => {
     try {
       const res = await getCurrentUser()
 
-      if (res?.data.isLogin === true) {
+      if (res?.data === true) {
         setIsSignedIn(true)
-        setCurrentUser(res?.data.data)
+        setCurrentUser(res?.data)
 
-        console.log(res?.data.data)
+        console.log(res?.data)
       } else {
         console.log("No current user")
       }

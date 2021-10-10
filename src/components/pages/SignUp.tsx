@@ -67,7 +67,7 @@ const SignUp: React.FC = () => {
         Cookies.set("_uid", res.headers["uid"])
 
         setIsSignedIn(true)
-        setCurrentUser(res.data)
+        // setCurrentUser(res.data.data)
 
         histroy.push("/")
 
